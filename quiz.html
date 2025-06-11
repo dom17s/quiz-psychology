@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+    }
+    .question {
+      margin-bottom: 20px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .choice {
+      display: block;
+      margin: 8px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .choice.correct {
+      background-color: #d4edda;
+      border-color: #28a745;
+      color: #155724;
+    }
+    .choice.wrong {
+      background-color: #f8d7da;
+      border-color: #dc3545;
+      color: #721c24;
+    }
+    .choice.disabled {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <h1>Online Quiz</h1>
+  <div id="quiz-container"></div>
+
+  <script>
+    fetch("quiz_data.json")
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById("quiz-container");
+
+        data.forEach((item, index) => {
+          const questionDiv = document.createElement("div");
+          questionDiv.className = "question";
+
+          const qTitle = document.createElement("h3");
+          qTitle.textContent = `${index + 1}. ${item.question}`;
+          questionDiv.appendChild(qTitle);
+
+          item.choices.forEach(choice => {
+            const choiceBtn = document.createElement("div");
+            choiceBtn.className = "choice";
+            choiceBtn.textContent = choice;
+
+            choiceBtn.addEventListener("click", () => {
+              const isCorrect = choice === item.correct_answer;
+              choiceBtn.classList.add(isCorrect ? "correct" : "wrong");
+
+              // Disable all choices
+              const allChoices = questionDiv.querySelectorAll(".choice");
+              allChoices.forEach(c => {
+                c.classList.add("disabled");
+                if (c.textContent === item.correct_answer) {
+                  c.classList.add("correct");
+                }
+              });
+            });
+
+            questionDiv.appendChild(choiceBtn);
+          });
+
+          container.appendChild(questionDiv);
+        });
+      })
+      .catch(err => {
+        document.getElementById("quiz-container").innerHTML =
+          "<p>Failed to load quiz data. Please make sure quiz_data.json is in the same directory.</p>";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
